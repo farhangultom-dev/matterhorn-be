@@ -1,4 +1,5 @@
 node_modules/
+bruno/
 dist/
 plan/
 .agents/
