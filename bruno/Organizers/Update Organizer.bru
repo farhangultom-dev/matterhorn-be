@@ -1,0 +1,37 @@
+meta {
+  name: Update Organizer
+  type: http
+  seq: 13
+  tags: [
+    organizers
+    auth
+  ]
+}
+
+patch {
+  url: {{baseUrl}}/api/v1/organizers/{{organizerId}}
+  body: json
+  auth: bearer
+}
+
+headers {
+  content-type: application/json
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "userId": null,
+    "communityId": null,
+    "phone": "+628987654321"
+  }
+}
+
+docs {
+  Updates only the supplied fields. Explicit null clears nullable fields, including both userId and communityId. Requires an active numeric role ID 1 or 4.
+  
+  Errors include 400 VALIDATION_ERROR, INVALID_USER, or INVALID_COMMUNITY, 401 UNAUTHORIZED, 403 FORBIDDEN, and 404 ORGANIZER_NOT_FOUND.
+}

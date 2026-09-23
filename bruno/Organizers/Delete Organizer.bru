@@ -1,0 +1,25 @@
+meta {
+  name: Delete Organizer
+  type: http
+  seq: 14
+  tags: [
+    organizers
+    auth
+  ]
+}
+
+delete {
+  url: {{baseUrl}}/api/v1/organizers/{{organizerId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+docs {
+  Soft-deletes the organizer and preserves related event rows. Requires an active numeric role ID 1 or 4.
+
+  Success response: 200 with data.deleted=true. Errors include 401 UNAUTHORIZED, 403 FORBIDDEN, and 404 ORGANIZER_NOT_FOUND.
+}

@@ -1,0 +1,30 @@
+meta {
+  name: Get Events
+  type: http
+  seq: 1
+  tags: [
+    events
+    public
+  ]
+}
+
+get {
+  url: {{baseUrl}}/api/v1/events?page=1&limit=20
+  body: none
+  auth: none
+}
+
+params:query {
+  page: 1
+  limit: 20
+  @description('optional dont send if not use')
+  ~search: 
+  @description('optional dont send if not use')
+  ~cityId: 
+  @description('optional dont send if not use')
+  ~disciplineSportId: 
+}
+
+docs {
+  Returns public, non-deleted events with stable pagination. Each event includes its event_discipline_sports rows whose linked discipline sport is active, in the disciplineSports array (with discipline sport name). All filters are optional: search matches title, slug, city name, or discipline sport name; cityId filters by city; disciplineSportId filters by discipline sport; organizerId, eventType, and startsFrom are also supported. Private or deleted events are excluded. Unknown or invalid query parameters return 400 VALIDATION_ERROR.
+}

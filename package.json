@@ -1,0 +1,46 @@
+{
+  "name": "matterhorn-be",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Matterhorn backend service",
+  "main": "dist/server.js",
+  "type": "commonjs",
+  "engines": {
+    "node": "24.x"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "dev:build": "tsc -p tsconfig.json --watch",
+    "dev": "node --watch dist/server.js",
+    "start": "node dist/server.js",
+    "db:check": "npm run build && node dist/scripts/check-db.js",
+    "db:migrate": "npm run build && knex --knexfile dist/database/knexfile.js migrate:latest",
+    "db:rollback": "npm run build && knex --knexfile dist/database/knexfile.js migrate:rollback",
+    "db:status": "npm run build && knex --knexfile dist/database/knexfile.js migrate:list",
+    "db:seed:reference": "npm run build && knex --knexfile dist/database/knexfile.js seed:run --specific=001_reference.js",
+    "db:seed:development": "npm run build && knex --knexfile dist/database/knexfile.js seed:run --specific=100_development.js",
+    "smtp:check": "npm run build && node dist/scripts/check-smtp.js"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.1133.0",
+    "bcrypt": "6.0.0",
+    "express": "5.2.1",
+    "jsonwebtoken": "9.0.3",
+    "knex": "3.3.0",
+    "multer": "^2.4.0",
+    "nodemailer": "10.0.9",
+    "pg": "8.23.0",
+    "zod": "4.6.4"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "6.0.0",
+    "@types/express": "5.0.6",
+    "@types/jsonwebtoken": "9.0.10",
+    "@types/multer": "^2.2.0",
+    "@types/node": "24.13.4",
+    "@types/nodemailer": "8.0.1",
+    "@types/pg": "8.23.1",
+    "typescript": "7.0.2"
+  }
+}

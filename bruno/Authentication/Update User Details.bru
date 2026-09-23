@@ -1,0 +1,43 @@
+meta {
+  name: Update User Details
+  type: http
+  seq: 6
+  tags: [
+    auth
+    users
+  ]
+}
+
+patch {
+  url: {{baseUrl}}/api/v1/users/me/details
+  body: json
+  auth: bearer
+}
+
+headers {
+  content-type: application/json
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "name": "Farhan Badag",
+    "address": "Jl. Merdeka 10",
+    "cityId": 1,
+    "phoneNumber": "0888888888888",
+    "gender": "male",
+    "height": 180,
+    "weight": 120
+  }
+}
+
+docs {
+  Updates the authenticated user's details. Omitted fields are preserved and nullable fields can be cleared with null.
+  
+  Run Login first so Bruno has `accessToken`. To remove the current profile photo, send only `{ "profilePhoto": null }` as the JSON body. A photo URL string is rejected.
+  
+  Success response: 200 with `data.details` in camelCase. Errors include 400 `VALIDATION_ERROR` or `INVALID_CITY`, 401 `UNAUTHORIZED`, and 415 `UNSUPPORTED_MEDIA_TYPE`.
+}

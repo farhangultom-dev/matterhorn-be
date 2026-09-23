@@ -1,0 +1,21 @@
+meta {
+  name: Get Cities by Province
+  type: http
+  seq: 2
+  tags: [
+    reference
+    cities
+  ]
+}
+
+get {
+  url: {{baseUrl}}/api/v1/provinces/8/cities
+  body: none
+  auth: none
+}
+
+docs {
+  Returns all active cities for the province ID in the URL, ordered alphabetically by name. Replace 4 with an active province ID from Get Provinces.
+  
+  Invalid IDs return 400 INVALID_PROVINCE_ID. An unknown or soft-deleted province returns 404 PROVINCE_NOT_FOUND. Success responses contain data.cities with id, provinceId, name, and createdAt.
+}

@@ -1,0 +1,19 @@
+meta {
+  name: Get Community
+  type: http
+  seq: 2
+  tags: [
+    communities
+    public
+  ]
+}
+
+get {
+  url: {{baseUrl}}/api/v1/communities/{{communityId}}
+  body: none
+  auth: none
+}
+
+docs {
+  Returns one active public community using communityId from the environment, including active disciplineSports, locations, schedules, and socialLinks arrays. Hidden, inactive, suspended, deleted, and unknown communities return 404 COMMUNITY_NOT_FOUND.
+}

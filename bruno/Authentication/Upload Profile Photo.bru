@@ -1,0 +1,33 @@
+meta {
+  name: Upload Profile Photo
+  type: http
+  seq: 7
+  tags: [
+    auth
+    users
+    upload
+  ]
+}
+
+patch {
+  url: {{baseUrl}}/api/v1/users/me/details
+  body: multipartForm
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:multipart-form {
+  profilePhoto: @file(C:\Users\pitja\Downloads\3645426416.jpg) @contentType(image/jpeg)
+  data: {"name":"Farhan Badag"}
+}
+
+docs {
+  Uploads one JPEG, PNG, or WebP file as profilePhoto (maximum 5 MiB). Place a real image at bruno/fixtures/profile-photo.png or edit the relative path before sending.
+  
+  The optional data part is a UTF-8 JSON object using the same metadata fields as Update User Details. Do not include profilePhoto in data. Bruno generates the multipart boundary automatically.
+  
+  Success response: 200 with the public S3 URL in data.details.profilePhoto. Errors include 400 INVALID_UPLOAD or VALIDATION_ERROR, 413 FILE_TOO_LARGE, 415 UNSUPPORTED_IMAGE_TYPE, and 503 STORAGE_UNAVAILABLE.
+}

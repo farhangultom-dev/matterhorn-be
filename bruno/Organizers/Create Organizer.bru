@@ -1,0 +1,36 @@
+meta {
+  name: Create Organizer
+  type: http
+  seq: 12
+  tags: [
+    organizers
+    auth
+  ]
+}
+
+post {
+  url: {{baseUrl}}/api/v1/organizers
+  body: multipartForm
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:multipart-form {
+  logo: @file(C:\Users\pitja\Downloads\b884b95ad95cdd7ea21c3b5c704e26fef62d2959f0f484b95e757c6575049777.jpg) @contentType(image/jpeg)
+  data: {"name":"Lampung Fight Night","userId":null,"communityId":null,"email":"info@lampungfightnight.com","phone":"08123456789"}
+}
+
+script:post-response {
+  if (res.getStatus() === 201) {
+    bru.setVar('organizerId', res.getBody().data.organizer.id);
+  }
+}
+
+docs {
+  Requires a verified account with an active numeric role ID 1 or 4. Upload one JPEG, PNG, or WebP file in the logo field (maximum 5 MiB) and provide organizer fields as the JSON data part. Both userId and communityId may be null at the same time. Place a real image at bruno/fixtures/organizer-logo.png or edit the path. The response stores the created UUID in the runtime organizerId variable.
+  
+  Errors include 400 INVALID_UPLOAD, VALIDATION_ERROR, INVALID_USER, or INVALID_COMMUNITY, 401 UNAUTHORIZED, 403 FORBIDDEN, 413 FILE_TOO_LARGE, 415 UNSUPPORTED_IMAGE_TYPE, and 503 STORAGE_UNAVAILABLE.
+}

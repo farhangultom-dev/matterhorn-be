@@ -1,0 +1,9 @@
+node_modules/
+dist/
+plan/
+.agents/
+*.log
+.env
+.env.*
+!.env.example
+bruno/environments/*.private.bru

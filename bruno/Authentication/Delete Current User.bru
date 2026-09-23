@@ -1,0 +1,26 @@
+meta {
+  name: Delete Current User
+  type: http
+  seq: 8
+  tags: [
+    auth
+    protected
+    destructive
+  ]
+}
+
+delete {
+  url: {{baseUrl}}/api/v1/users/me
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+docs {
+  Soft-deletes the authenticated user and the active user_details row by setting deleted_at. The request uses the Bearer token subject; it does not accept a user ID.
+
+  Success response: 200 with data.deleted set to true. After deletion, the access token cannot be used for protected endpoints and the account cannot log in while deleted_at is set. Do not run this request against a user you need to keep.
+}

@@ -1,0 +1,35 @@
+meta {
+  name: Register
+  type: http
+  seq: 1
+  tags: [
+    auth
+  ]
+}
+
+post {
+  url: {{baseUrl}}/api/v1/auth/register
+  body: json
+  auth: none
+}
+
+headers {
+  content-type: application/json
+}
+
+body:json {
+  {
+    "name": "farhan",
+    "email": "farhangultomdev@gmail.com",
+    "password": "password123"
+  }
+}
+
+docs {
+  Creates a pending account, assigns role_id 5 through user_roles, and sends a six digit verification code through SMTP. Role ID 5 must already exist and be active.
+  
+  Before sending this request, set registrationEmail to an unused email address. registrationPassword must contain at least 8 characters and at most 72 UTF-8 bytes.
+  
+  Success response: 201 with a public user object containing isEmailVerified=false. Verify the code before running Login; no access token is issued.
+  Error responses: 400 VALIDATION_ERROR, 409 EMAIL_ALREADY_EXISTS, 503 EMAIL_DELIVERY_UNAVAILABLE, or 500 AUTH_REFERENCE_DATA_MISSING when role ID 5 is unavailable.
+}

@@ -1,0 +1,21 @@
+meta {
+  name: Get Provinces
+  type: http
+  seq: 1
+  tags: [
+    reference
+    provinces
+  ]
+}
+
+get {
+  url: {{baseUrl}}/api/v1/provinces
+  body: none
+  auth: none
+}
+
+docs {
+  Returns all active provinces ordered alphabetically by name. Soft-deleted provinces are excluded.
+
+  Success response: 200 with data.provinces containing id, name, and createdAt.
+}

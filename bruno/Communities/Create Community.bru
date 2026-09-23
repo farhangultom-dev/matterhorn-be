@@ -1,0 +1,46 @@
+meta {
+  name: Create Community
+  type: http
+  seq: 3
+  tags: [
+    communities
+    auth
+  ]
+}
+
+post {
+  url: {{baseUrl}}/api/v1/communities
+  body: json
+  auth: bearer
+}
+
+headers {
+  content-type: application/json
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "name": "Bruno Community",
+    "slug": "bruno-community",
+    "description": "Community created from Bruno",
+    "cityId": 1,
+    "visibility": "public",
+    "contactPerson": "Bruno User"
+  }
+}
+
+script:post-response {
+  if (res.getStatus() === 201) {
+    bru.setVar('communityId', res.getBody().data.community.id);
+  }
+}
+
+docs {
+  Requires a verified account with community_owner or admin role. The server sets ownerUserId from the Bearer token and always starts the community with status draft. The response stores the returned UUID in the runtime communityId variable.
+
+  Errors include 400 VALIDATION_ERROR or INVALID_CITY, 401 UNAUTHORIZED, 403 FORBIDDEN, and 409 COMMUNITY_SLUG_EXISTS.
+}

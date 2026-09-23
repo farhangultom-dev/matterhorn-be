@@ -1,0 +1,32 @@
+meta {
+  name: Verify Email
+  type: http
+  seq: 2
+  tags: [
+    auth
+    verification
+  ]
+}
+
+post {
+  url: {{baseUrl}}/api/v1/auth/verify-email
+  body: json
+  auth: none
+}
+
+headers {
+  content-type: application/json
+}
+
+body:json {
+  {
+    "email": "farhangultomdev@gmail.com",
+    "otp": "625764"
+  }
+}
+
+docs {
+  Verifies the six digit code sent after Register. Set verificationOtp from the test inbox before sending. The OTP expires after 10 minutes and can be used once.
+  
+  Success response: 200 with data.isEmailVerified=true. Errors include 400 INVALID_OR_EXPIRED_OTP and 409 EMAIL_ALREADY_VERIFIED.
+}

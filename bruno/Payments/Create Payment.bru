@@ -1,0 +1,49 @@
+meta {
+  name: Create Payment
+  type: http
+  seq: 1
+  tags: [
+    payments
+    auth
+  ]
+}
+
+post {
+  url: {{baseUrl}}/api/v1/payments
+  body: json
+  auth: bearer
+}
+
+headers {
+  content-type: application/json
+  Idempotency-Key: {{checkoutKey}}
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "items": [
+      {
+        "eventTicketTypeId": "{{eventTicketTypeId}}",
+        "quantity": 1
+      }
+    ],
+    "expiresInHours": 1,
+    "paymentMethodTypeCode": "QRIS"
+  }
+}
+
+script:post-response {
+  if (res.getStatus() === 201 || res.getStatus() === 200) {
+    bru.setVar('orderId', res.getBody().data.order.id);
+  } else if (res.getStatus() === 202) {
+    bru.setVar('orderId', res.getBody().data.orderId);
+  }
+}
+
+docs {
+  Requires a verified user's Bearer token. Replace eventTicketTypeId with an active ticket UUID from Get Event. The server reads prices from PostgreSQL, accepts one event per checkout, and calculates the ticket subtotal. Sumopod QRIS adds its fee to the amount paid by the user; a successful response exposes subtotalAmount, feeAmount, and totalAmount separately. Set checkoutKey to a new UUID for a new intended checkout; reuse the same key and exact request body when retrying. The Sumopod API key and return URLs are configured only on the backend in .env. HTTP 201 means a pending payment link was created, 200 is an idempotent replay, and 202 means the remote outcome is unresolved; query Get Payment Order and do not treat pending as paid. Errors include 400 VALIDATION_ERROR or TICKET_UNAVAILABLE, 401 UNAUTHORIZED, 403 EMAIL_NOT_VERIFIED, 409 TICKET_SOLD_OUT or IDEMPOTENCY_KEY_REUSED, 502 PAYMENT_GATEWAY_REJECTED, and 503 PAYMENT_GATEWAY_UNAVAILABLE.
+}

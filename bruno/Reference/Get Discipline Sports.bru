@@ -1,0 +1,21 @@
+meta {
+  name: Get Discipline Sports
+  type: http
+  seq: 5
+  tags: [
+    reference
+    discipline-sports
+  ]
+}
+
+get {
+  url: {{baseUrl}}/api/v1/discipline-sports
+  body: none
+  auth: none
+}
+
+docs {
+  Returns all active discipline sports ordered alphabetically by name. Soft-deleted discipline sports are excluded.
+
+  Success response: 200 with data.disciplineSports containing id, name, and createdAt.
+}

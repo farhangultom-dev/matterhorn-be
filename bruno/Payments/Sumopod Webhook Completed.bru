@@ -1,0 +1,42 @@
+meta {
+  name: Sumopod Webhook Completed
+  type: http
+  seq: 3
+  tags: [
+    payments
+    webhook
+  ]
+}
+
+post {
+  url: {{baseUrl}}/api/v1/payments/webhooks/sumopod
+  body: json
+  auth: none
+}
+
+headers {
+  content-type: application/json
+  X-Webhook-Token: {{sumopodWebhookToken}}
+}
+
+body:json {
+  {
+    "event_type": "payment.completed",
+    "data": {
+      "payment_id": "7218e469-95cb-455d-97dd-4564161158c1",
+      "order_id": "MH-093ed9d1-3ae5-417a-a186-4841e699122f",
+      "amount": 101000,
+      "fee": 1000,
+      "net_amount": 100000,
+      "status": "completed",
+      "payment_method": "qris",
+      "paid_at": "2026-09-23T12:00:00Z",
+      "settled_at": "2026-09-23T12:00:00Z",
+      "completed_at": "2026-09-23T12:00:00Z"
+    }
+  }
+}
+
+docs {
+  Sends a token-verified Sumopad payment.completed event without JWT. Set sumopodWebhookToken in the Local environment and replace payment_id, order_id, amount, fee, and net_amount with values matching a local Sumopad payment. This request changes the matching local payment and order to paid; do not run it against production or an unrelated payment.
+}

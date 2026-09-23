@@ -1,0 +1,36 @@
+meta {
+  name: Add Community Social Link
+  type: http
+  seq: 11
+  tags: [
+    communities
+  ]
+}
+
+post {
+  url: {{baseUrl}}/api/v1/communities/{{communityId}}/social-links
+  body: json
+  auth: bearer
+}
+
+headers {
+  content-type: application/json
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "platform": "instagram",
+    "url": "https://instagram.com/example"
+  }
+}
+
+docs {
+  Adds a social link to the community. The caller must own the community or have the active admin role. Platform names are trimmed and stored in lowercase. URLs must use HTTPS, and a community can only have one active link for each platform.
+
+  Success response: 201 with data.communitySocialLink containing id, communityId, platform, url, and createdAt.
+  Errors include 400 VALIDATION_ERROR, 401 UNAUTHORIZED, 403 FORBIDDEN, 404 COMMUNITY_NOT_FOUND, and 409 COMMUNITY_SOCIAL_LINK_ALREADY_EXISTS.
+}

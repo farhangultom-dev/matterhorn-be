@@ -1,0 +1,30 @@
+meta {
+  name: Upload Community Cover
+  type: http
+  seq: 7
+  tags: [
+    communities
+    auth
+    upload
+  ]
+}
+
+patch {
+  url: {{baseUrl}}/api/v1/communities/{{communityId}}/cover
+  body: multipartForm
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:multipart-form {
+  cover: @file(C:\Users\pitja\Downloads\banner_rsrc (1).png) @contentType(image/png)
+}
+
+docs {
+  Uploads one JPEG, PNG, or WebP file in the `cover` field (maximum 5 MiB). Replace the fixture path with a real local image before sending. The caller must own the community or have the active admin role; owners cannot modify suspended communities.
+  
+  Success response: 200 with the public S3 URL in data.community.coverUrl. Errors include 400 INVALID_UPLOAD, 401 UNAUTHORIZED, 403 FORBIDDEN, 404 COMMUNITY_NOT_FOUND, 413 FILE_TOO_LARGE, 415 UNSUPPORTED_IMAGE_TYPE, and 503 STORAGE_UNAVAILABLE.
+}
