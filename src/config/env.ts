@@ -109,6 +109,7 @@ const s3Schema = z
 const sumopodSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   SUMOPOD_BASE_URL: optionalText,
+  SUMOPOD_ALLOW_SANDBOX_IN_PRODUCTION: optionalBoolean,
   SUMOPOD_API_KEY: optionalText,
   SUMOPOD_SUCCESS_RETURN_URL: optionalText,
   SUMOPOD_CANCEL_RETURN_URL: optionalText,
@@ -128,8 +129,14 @@ const sumopodSchema = z.object({
     if (parsed.protocol !== 'https:' || parsed.username || parsed.password || parsed.search || parsed.hash) {
       context.addIssue({ code: 'custom', path: ['SUMOPOD_BASE_URL'], message: 'Must be an HTTPS URL without credentials, query, or fragment' });
     }
-    if (value.NODE_ENV === 'production' && parsed.hostname === 'api-pay-sandbox.sumopod.com') {
-      context.addIssue({ code: 'custom', path: ['SUMOPOD_BASE_URL'], message: 'Production must not use the sandbox endpoint' });
+    if (value.NODE_ENV === 'production'
+      && parsed.hostname === 'api-pay-sandbox.sumopod.com'
+      && !value.SUMOPOD_ALLOW_SANDBOX_IN_PRODUCTION) {
+      context.addIssue({
+        code: 'custom',
+        path: ['SUMOPOD_BASE_URL'],
+        message: 'Production must not use the sandbox endpoint unless SUMOPOD_ALLOW_SANDBOX_IN_PRODUCTION=true',
+      });
     }
   } catch {
     context.addIssue({ code: 'custom', path: ['SUMOPOD_BASE_URL'], message: 'Must be a valid HTTPS URL' });
