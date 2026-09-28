@@ -13,7 +13,9 @@ export interface GeneratedEmailOtp {
 }
 
 const createOtpHash = (userId: string, code: string, secret: string): Buffer =>
-  createHmac('sha256', secret).update('matterhorn-email-verification:' + userId + ':' + code).digest();
+  createHmac('sha256', secret)
+    .update('matterhorn-email-verification:' + userId.replaceAll('-', '').toLowerCase() + ':' + code)
+    .digest();
 
 export const generateEmailOtp = ({ userId, secret, now }: { userId: string; secret: string; now: Date }): GeneratedEmailOtp => {
   const code = randomInt(0, 1_000_000).toString().padStart(6, '0');
