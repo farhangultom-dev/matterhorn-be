@@ -16,6 +16,10 @@ export interface UserDetailsRecord {
   readonly deleted_at: Date | null;
 }
 
+export interface UserDetailsWithCityRecord extends UserDetailsRecord {
+  readonly city_name: string | null;
+}
+
 export interface ActiveUserRecord {
   readonly id: string;
   readonly name: string;
@@ -65,8 +69,15 @@ export const findActiveCityInTransaction = async (transaction: Knex.Transaction,
 export const findUserDetailsByUserId = async (transaction: Knex.Transaction, userId: string): Promise<UserDetailsRecord | undefined> =>
   selectDetails(transaction<UserDetailsRecord>('user_details')).where({ user_id: userId }).first();
 
-export const findActiveUserDetailsByUserId = async (userId: string): Promise<UserDetailsRecord | undefined> =>
-  selectDetails(getDatabase()<UserDetailsRecord>('user_details')).where({ user_id: userId }).whereNull('deleted_at').first();
+export const findActiveUserDetailsByUserId = async (userId: string): Promise<UserDetailsWithCityRecord | undefined> =>
+  getDatabase()<UserDetailsWithCityRecord>('user_details')
+    .leftJoin('cities', function joinActiveCity() {
+      this.on('cities.id', '=', 'user_details.city_id').andOnNull('cities.deleted_at');
+    })
+    .select(...columns.map((column) => `user_details.${column}`), 'cities.name as city_name')
+    .where('user_details.user_id', userId)
+    .whereNull('user_details.deleted_at')
+    .first();
 
 export const upsertUserDetails = async (transaction: Knex.Transaction, userId: string, values: UserDetailsValues): Promise<UserDetailsRecord> => {
   const rows = await transaction<UserDetailsRecord>('user_details')

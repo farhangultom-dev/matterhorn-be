@@ -7,13 +7,15 @@ export interface PublicUser {
   readonly isEmailVerified: boolean;
   readonly createdAt: string;
   readonly updatedAt: string;
+  readonly cityName?: string | null;
 }
 
-export const presentUser = (user: UserRecord): PublicUser => ({
+export const presentUser = (user: UserRecord, cityName?: string | null): PublicUser => ({
   id: user.id,
   name: user.name,
   email: user.email,
   isEmailVerified: user.is_email_verified,
   createdAt: new Date(user.created_at).toISOString(),
   updatedAt: new Date(user.updated_at).toISOString(),
+  ...(cityName === undefined ? {} : { cityName }),
 });

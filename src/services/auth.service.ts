@@ -7,7 +7,8 @@ import type { LoginInput, RegisterInput, ResendVerificationOtpInput, VerifyEmail
 import { AppError } from '../utils/app-error';
 import { comparePassword, dummyPasswordHash, hashPassword } from '../utils/password';
 import { createAccessToken } from '../utils/jwt';
-import { findActiveUserDetailsByUserId, type UserDetailsRecord } from '../models/user-details.model';
+import { findActiveUserDetailsByUserId, type UserDetailsWithCityRecord } from '../models/user-details.model';
+import { findActiveUserDisciplineSportsByUserId, type UserDisciplineSportRecord } from '../models/user-discipline-sport.model';
 import { generateEmailOtp, EMAIL_OTP_MAX_FAILED_ATTEMPTS, EMAIL_OTP_MAX_RESENDS, EMAIL_OTP_RESEND_DELAY_MS, EMAIL_OTP_WINDOW_MS, matchesEmailOtp } from '../utils/email-otp';
 import { sendVerificationEmail } from './mail.service';
 
@@ -76,14 +77,18 @@ export const login = async (input: LoginInput): Promise<LoginResult> => {
 
 export interface CurrentUserResult {
   readonly user: UserRecord;
-  readonly userDetails: UserDetailsRecord | null;
+  readonly userDetails: UserDetailsWithCityRecord | null;
+  readonly userDisciplineSports: readonly UserDisciplineSportRecord[];
 }
 
 export const getCurrentUser = async (userId: string): Promise<CurrentUserResult> => {
   const user = await findUserById(userId);
   if (!user) throw new AppError(401, 'UNAUTHORIZED', 'Authentication required');
-  const details = await findActiveUserDetailsByUserId(userId);
-  return { user, userDetails: details ?? null };
+  const [details, userDisciplineSports] = await Promise.all([
+    findActiveUserDetailsByUserId(userId),
+    findActiveUserDisciplineSportsByUserId(userId),
+  ]);
+  return { user, userDetails: details ?? null, userDisciplineSports };
 };
 
 export const deleteCurrentUser = async (userId: string): Promise<void> => {
