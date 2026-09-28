@@ -11,6 +11,7 @@ interface UserDetailsViewRecord {
   readonly profile_photo: string | null;
   readonly created_at: Date;
   readonly city_name?: string | null;
+  readonly province_name?: string | null;
 }
 
 export interface PublicUserDetails {
@@ -26,6 +27,7 @@ export interface PublicUserDetails {
   readonly profilePhoto: string | null;
   readonly createdAt: Date;
   readonly cityName?: string | null;
+  readonly provinceName?: string | null;
 }
 
 export const presentUserDetails = (details: UserDetailsViewRecord): PublicUserDetails => ({
@@ -41,4 +43,5 @@ export const presentUserDetails = (details: UserDetailsViewRecord): PublicUserDe
   profilePhoto: details.profile_photo,
   createdAt: details.created_at,
   ...('city_name' in details ? { cityName: details.city_name ?? null } : {}),
+  ...('province_name' in details ? { provinceName: details.province_name ?? null } : {}),
 });

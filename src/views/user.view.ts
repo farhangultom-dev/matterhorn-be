@@ -8,9 +8,10 @@ export interface PublicUser {
   readonly createdAt: string;
   readonly updatedAt: string;
   readonly cityName?: string | null;
+  readonly provinceName?: string | null;
 }
 
-export const presentUser = (user: UserRecord, cityName?: string | null): PublicUser => ({
+export const presentUser = (user: UserRecord, cityName?: string | null, provinceName?: string | null): PublicUser => ({
   id: user.id,
   name: user.name,
   email: user.email,
@@ -18,4 +19,5 @@ export const presentUser = (user: UserRecord, cityName?: string | null): PublicU
   createdAt: new Date(user.created_at).toISOString(),
   updatedAt: new Date(user.updated_at).toISOString(),
   ...(cityName === undefined ? {} : { cityName }),
+  ...(provinceName === undefined ? {} : { provinceName }),
 });

@@ -18,6 +18,7 @@ export interface UserDetailsRecord {
 
 export interface UserDetailsWithCityRecord extends UserDetailsRecord {
   readonly city_name: string | null;
+  readonly province_name: string | null;
 }
 
 export interface ActiveUserRecord {
@@ -74,7 +75,10 @@ export const findActiveUserDetailsByUserId = async (userId: string): Promise<Use
     .leftJoin('cities', function joinActiveCity() {
       this.on('cities.id', '=', 'user_details.city_id').andOnNull('cities.deleted_at');
     })
-    .select(...columns.map((column) => `user_details.${column}`), 'cities.name as city_name')
+    .leftJoin('provinces', function joinActiveProvince() {
+      this.on('provinces.id', '=', 'cities.province_id').andOnNull('provinces.deleted_at');
+    })
+    .select(...columns.map((column) => `user_details.${column}`), 'cities.name as city_name', 'provinces.name as province_name')
     .where('user_details.user_id', userId)
     .whereNull('user_details.deleted_at')
     .first();

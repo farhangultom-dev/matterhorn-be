@@ -18,13 +18,14 @@ export const loginController: RequestHandler = async (_request, response) => {
 export const meController: RequestHandler = async (request, response) => {
   const result = await getCurrentUser(request.auth!.userId);
   response.json(successResponse('Profile retrieved', {
-    user: presentUser(result.user, result.userDetails?.city_name ?? null),
+    user: presentUser(result.user, result.userDetails?.city_name ?? null, result.userDetails?.province_name ?? null),
     userDetails: result.userDetails ? presentUserDetails(result.userDetails) : null,
     userDisciplineSports: result.userDisciplineSports.map((sport) => ({
       id: sport.id,
       disciplineSportId: sport.discipline_sport_id,
       disciplineSportName: sport.discipline_sport_name,
       cityName: sport.city_name,
+      provinceName: sport.province_name,
     })),
   }));
 };
