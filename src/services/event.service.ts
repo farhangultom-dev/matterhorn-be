@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { getDatabase } from '../config/database';
 import { hasAnyActiveRoleId } from '../models/user-role.model';
-import { findActiveCityInTransaction, findActiveOrganizerInTransaction, findEventDisciplineSports, findEventForUpdate, findEventTicketTypes, findPublicEventById, findPublicEvents, insertEvent, insertEventDisciplineSports, insertEventTicketTypes, isEventCityForeignKeyError, isEventDisciplineSportForeignKeyError, isEventOrganizerForeignKeyError, isUniqueEventSlugError, softDeleteEvent, updateEvent as updateEventRecord, type EventCreateValues, type EventDisciplineSportCreateValues, type EventDisciplineSportRecord, type EventListFilters, type EventRecord, type EventTicketTypeCreateValues, type EventTicketTypeRecord, type EventUpdateValues } from '../models/event.model';
+import { findActiveCityInTransaction, findActiveOrganizerInTransaction, findEventDisciplineSports, findEventForUpdate, findEventTicketTypes, findNearestPublicEvents, findPublicEventById, findPublicEvents, insertEvent, insertEventDisciplineSports, insertEventTicketTypes, isEventCityForeignKeyError, isEventDisciplineSportForeignKeyError, isEventOrganizerForeignKeyError, isUniqueEventSlugError, softDeleteEvent, updateEvent as updateEventRecord, type EventCreateValues, type EventDisciplineSportCreateValues, type EventDisciplineSportRecord, type EventListFilters, type EventRecord, type EventTicketTypeCreateValues, type EventTicketTypeRecord, type EventUpdateValues } from '../models/event.model';
 import type { CreateEventInput, UpdateEventInput } from '../validations/event.validation';
 import { AppError } from '../utils/app-error';
 import { deleteUploadedEventPoster, uploadEventPoster, type EventPosterFile, type UploadedEventPoster } from './event-poster-storage.service';
@@ -130,6 +130,11 @@ const attachEventRelations = async (events: readonly EventRecord[]): Promise<Eve
 export const listPublicEvents = async (filters: EventListFilters): Promise<{ rows: EventWithRelations[]; total: number }> => {
   const result = await findPublicEvents(filters);
   return { rows: await attachEventRelations(result.rows), total: result.total };
+};
+
+export const getNearestPublicEvents = async (): Promise<EventWithRelations[]> => {
+  const events = await findNearestPublicEvents();
+  return attachEventRelations(events);
 };
 
 export const getPublicEvent = async (eventId: string): Promise<EventDetailWithRelations> => {

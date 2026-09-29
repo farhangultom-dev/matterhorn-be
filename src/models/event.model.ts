@@ -182,6 +182,13 @@ export const findPublicEvents = async (filters: EventListFilters): Promise<Event
   return { rows, total: Number(countRow?.count ?? 0) };
 };
 
+export const findNearestPublicEvents = async (): Promise<EventRecord[]> =>
+  selectEventColumns(createPublicEventQuery())
+    .whereRaw("events.starts_at >= (date_trunc('day', now() AT TIME ZONE 'Asia/Jakarta') AT TIME ZONE 'Asia/Jakarta')")
+    .whereRaw('events.ends_at > now()')
+    .orderBy([{ column: 'starts_at', order: 'asc' }, { column: 'id', order: 'asc' }])
+    .limit(3);
+
 export const findPublicEventById = async (eventId: string): Promise<EventRecord | undefined> =>
   selectEventColumns(createPublicEventQuery()).where({ id: eventId }).first();
 

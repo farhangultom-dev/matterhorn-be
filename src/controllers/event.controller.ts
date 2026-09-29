@@ -1,5 +1,5 @@
 import type { RequestHandler } from 'express';
-import { createEvent, deleteEvent, getPublicEvent, listPublicEvents, updateEvent } from '../services/event.service';
+import { createEvent, deleteEvent, getNearestPublicEvents, getPublicEvent, listPublicEvents, updateEvent } from '../services/event.service';
 import type { CreateEventInput, EventIdParams, ListEventsQuery, UpdateEventInput } from '../validations/event.validation';
 import { successResponse } from '../views/response.view';
 import { presentEvent } from '../views/event.view';
@@ -19,6 +19,13 @@ export const listEventsController: RequestHandler = async (_request, response) =
       total: result.total,
       totalPages: result.total === 0 ? 0 : Math.ceil(result.total / filters.limit),
     },
+  }));
+};
+
+export const nearestEventsController: RequestHandler = async (_request, response) => {
+  const events = await getNearestPublicEvents();
+  response.json(successResponse('Nearest active events retrieved', {
+    events: events.map(presentEvent),
   }));
 };
 
