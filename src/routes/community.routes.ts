@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { addCommunityDisciplineSportController, addCommunityLocationController, addCommunityScheduleController, addCommunitySocialLinkController, listCommunitiesController, getCommunityController, createCommunityController, deleteCommunityController, updateCommunityController, updateCommunityCoverController, updateCommunityLogoController } from '../controllers/community.controller';
+import { addCommunityDisciplineSportController, addCommunityLocationController, addCommunityScheduleController, addCommunitySocialLinkController, listCommunitiesController, randomCommunitiesController, getCommunityController, createCommunityController, deleteCommunityController, updateCommunityController, updateCommunityCoverController, updateCommunityLogoController } from '../controllers/community.controller';
 import { authenticate } from '../middlewares/authenticate.middleware';
 import { parseCommunityCoverUpload, parseCommunityLogoUpload } from '../middlewares/community-media-upload.middleware';
 import { validateBody, validateParams, validateQuery } from '../middlewares/validate.middleware';
@@ -7,6 +7,7 @@ import { addCommunityDisciplineSportSchema, addCommunityLocationSchema, addCommu
 
 const router = Router();
 router.get('/', validateQuery(listCommunitiesQuerySchema), listCommunitiesController);
+router.get('/random', randomCommunitiesController);
 router.get('/:communityId', validateParams(communityIdParamsSchema), getCommunityController);
 router.post('/', authenticate, validateBody(createCommunitySchema), createCommunityController);
 router.patch('/:communityId/logo', authenticate, validateParams(communityIdParamsSchema), parseCommunityLogoUpload, updateCommunityLogoController);

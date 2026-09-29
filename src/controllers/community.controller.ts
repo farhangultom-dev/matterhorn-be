@@ -1,5 +1,5 @@
 import type { RequestHandler } from 'express';
-import { addCommunityDisciplineSport, addCommunityLocation, addCommunitySchedule, addCommunitySocialLink, createCommunity, deleteCommunity, getPublicCommunity, listPublicCommunities, updateCommunity, updateCommunityCover, updateCommunityLogo } from '../services/community.service';
+import { addCommunityDisciplineSport, addCommunityLocation, addCommunitySchedule, addCommunitySocialLink, createCommunity, deleteCommunity, getPublicCommunity, getRandomPublicCommunities, listPublicCommunities, updateCommunity, updateCommunityCover, updateCommunityLogo } from '../services/community.service';
 import type { AddCommunityDisciplineSportInput, AddCommunityLocationInput, AddCommunityScheduleInput, AddCommunitySocialLinkInput, CommunityIdParams, CreateCommunityInput, ListCommunitiesQuery, UpdateCommunityInput } from '../validations/community.validation';
 import type { CommunityMediaFile } from '../services/community-media-storage.service';
 import { successResponse } from '../views/response.view';
@@ -17,6 +17,13 @@ export const listCommunitiesController: RequestHandler = async (_request, respon
       total: result.total,
       totalPages: result.total === 0 ? 0 : Math.ceil(result.total / filters.limit),
     },
+  }));
+};
+
+export const randomCommunitiesController: RequestHandler = async (_request, response) => {
+  const communities = await getRandomPublicCommunities();
+  response.json(successResponse('Random communities retrieved', {
+    communities: communities.map(presentCommunity),
   }));
 };
 

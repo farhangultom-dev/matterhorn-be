@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { getDatabase } from '../config/database';
 import { hasActiveRole, hasAnyActiveRole } from '../models/user-role.model';
-import { findActiveCityInTransaction, findCommunityForMediaAuthorization, findCommunityForUpdate, findPublicCommunities, findPublicCommunityById, insertCommunity, isUniqueCommunitySlugError, softDeleteCommunity, updateCommunity as updateCommunityRecord, type CommunityCreateValues, type CommunityListFilters, type CommunityRecord, type CommunityUpdateValues } from '../models/community.model';
+import { findActiveCityInTransaction, findCommunityForMediaAuthorization, findCommunityForUpdate, findPublicCommunities, findPublicCommunityById, findRandomPublicCommunities, insertCommunity, isUniqueCommunitySlugError, softDeleteCommunity, updateCommunity as updateCommunityRecord, type CommunityCreateValues, type CommunityListFilters, type CommunityRecord, type CommunityUpdateValues } from '../models/community.model';
 import { CommunityDisciplineSportAlreadyExistsError, CommunityLocationCityNotFoundError, CommunityPrimaryLocationAlreadyExistsError, CommunityScheduleAlreadyExistsError, CommunityScheduleLocationNotFoundError, CommunitySocialLinkAlreadyExistsError, DisciplineSportNotFoundError, findCommunityRelations, insertCommunityDisciplineSport, insertCommunityLocation, insertCommunitySchedule, insertCommunitySocialLink, isUniqueCommunityPrimaryLocationError, type CommunityDisciplineSportRecord, type CommunityLocationRecord, type CommunityScheduleRecord, type CommunitySocialLinkRecord, type CommunityWithRelations } from '../models/community-relation.model';
 import { deleteManagedCommunityMediaByUrl, deleteUploadedCommunityMedia, uploadCommunityMedia, type CommunityMediaFile, type CommunityMediaKind, type UploadedCommunityMedia } from './community-media-storage.service';
 import { StorageUnavailableError } from './profile-photo-storage.service';
@@ -24,6 +24,11 @@ export const attachCommunityRelations = async (communities: readonly CommunityRe
 export const listPublicCommunities = async (filters: CommunityListFilters): Promise<{ rows: CommunityWithRelations[]; total: number }> => {
   const result = await findPublicCommunities(filters);
   return { rows: await attachCommunityRelations(result.rows), total: result.total };
+};
+
+export const getRandomPublicCommunities = async (): Promise<CommunityWithRelations[]> => {
+  const communities = await findRandomPublicCommunities(4);
+  return attachCommunityRelations(communities);
 };
 
 export const getPublicCommunity = async (communityId: string): Promise<CommunityWithRelations> => {

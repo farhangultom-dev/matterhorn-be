@@ -95,6 +95,11 @@ export const findPublicCommunities = async (filters: CommunityListFilters): Prom
   return { rows, total: Number(countRow?.count ?? 0) };
 };
 
+export const findRandomPublicCommunities = async (limit: number): Promise<CommunityRecord[]> =>
+  selectCommunityColumns(createPublicCommunityQuery())
+    .orderByRaw('random()')
+    .limit(limit);
+
 export const findPublicCommunityById = async (communityId: string): Promise<CommunityRecord | undefined> =>
   selectCommunityColumns(createPublicCommunityQuery()).where({ id: communityId }).first();
 
