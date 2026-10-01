@@ -5,7 +5,10 @@ import {
   countHeldEventQuantity,
   countHeldQuantitiesByTicketType,
   findLatestPaymentTransaction,
+  findLatestPaymentTransactionsForOrders,
   findOrderByCheckoutKey,
+  findPaymentOrderHistoryItems,
+  findPaymentOrderHistoryPage,
   findPaymentOrder,
   findPaymentOrderItems,
   findPaymentTransactionForUpdate,
@@ -23,7 +26,7 @@ import {
   type PaymentOrderRecord,
   type PaymentTransactionRecord,
 } from '../models/payment.model';
-import type { CreatePaymentInput } from '../validations/payment.validation';
+import type { CreatePaymentInput, PaymentOrderHistoryQuery } from '../validations/payment.validation';
 import { AppError } from '../utils/app-error';
 import { createSumopodPayment, SumopodConfigurationError, SumopodOutcomeUnknownError, SumopodRejectedError } from './sumopod.service';
 
@@ -33,6 +36,12 @@ export interface PaymentCheckout {
   readonly order: PaymentOrderRecord;
   readonly items: readonly PaymentOrderItemRecord[];
   readonly payment: PaymentTransactionRecord;
+}
+
+export interface PaymentOrderHistoryEntry {
+  readonly order: PaymentOrderRecord;
+  readonly items: readonly (PaymentOrderItemRecord & { readonly event_title: string; readonly ticket_type_name: string })[];
+  readonly payment: PaymentTransactionRecord | null;
 }
 
 interface CreatedPaymentAttempt {
@@ -274,3 +283,28 @@ export const createPaymentCheckout = async ({ userId, checkoutKey, input }: { us
 
 export const getOwnedPaymentCheckout = async ({ orderId, userId }: { orderId: string; userId: string }): Promise<PaymentCheckout> =>
   loadCheckout(orderId, userId);
+
+export const getPaymentOrderHistory = async ({ userId, page, limit, search }: PaymentOrderHistoryQuery & { userId: string }): Promise<{ rows: PaymentOrderHistoryEntry[]; total: number }> => {
+  const database = getDatabase();
+  const result = await findPaymentOrderHistoryPage(database, userId, search, limit, (page - 1) * limit);
+  const orderIds = result.rows.map((order) => order.id);
+  const [items, payments] = await Promise.all([
+    findPaymentOrderHistoryItems(database, orderIds),
+    findLatestPaymentTransactionsForOrders(database, orderIds),
+  ]);
+  const itemsByOrder = new Map<string, (PaymentOrderItemRecord & { event_title: string; ticket_type_name: string })[]>();
+  for (const item of items) {
+    const orderItems = itemsByOrder.get(item.order_id) ?? [];
+    orderItems.push(item);
+    itemsByOrder.set(item.order_id, orderItems);
+  }
+  const paymentByOrder = new Map(payments.map((payment) => [payment.order_id, payment]));
+  return {
+    rows: result.rows.map((order) => ({
+      order,
+      items: itemsByOrder.get(order.id) ?? [],
+      payment: paymentByOrder.get(order.id) ?? null,
+    })),
+    total: result.total,
+  };
+};

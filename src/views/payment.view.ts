@@ -1,4 +1,21 @@
-import type { PaymentCheckout } from '../services/payment.service';
+import type { PaymentCheckout, PaymentOrderHistoryEntry } from '../services/payment.service';
+
+const toIso = (value: Date | string | null): string | null => value === null ? null : new Date(value).toISOString();
+
+const presentPayment = (payment: PaymentOrderHistoryEntry['payment']) => payment === null ? null : ({
+  id: payment.id,
+  provider: payment.provider,
+  providerReference: payment.provider_reference,
+  merchantReference: payment.merchant_reference,
+  status: payment.status,
+  initiationStatus: payment.initiation_state,
+  amount: payment.amount,
+  providerFeeAmount: payment.provider_fee_amount,
+  providerNetAmount: payment.provider_net_amount,
+  paymentLinkUrl: payment.payment_link_url,
+  expiresAt: toIso(payment.expires_at),
+  paidAt: toIso(payment.paid_at),
+});
 
 export const presentPaymentCheckout = (checkout: PaymentCheckout) => ({
   order: {
@@ -27,4 +44,25 @@ export const presentPaymentCheckout = (checkout: PaymentCheckout) => ({
     paymentLinkUrl: checkout.payment.payment_link_url,
     expiresAt: checkout.payment.expires_at === null ? null : new Date(checkout.payment.expires_at).toISOString(),
   },
+});
+
+export const presentPaymentOrderHistoryEntry = (entry: PaymentOrderHistoryEntry) => ({
+  id: entry.order.id,
+  userId: entry.order.user_id,
+  status: entry.order.status,
+  subtotalAmount: entry.order.subtotal_amount,
+  feeAmount: entry.order.fee_amount,
+  totalAmount: entry.order.total_amount,
+  createdAt: toIso(entry.order.created_at),
+  paidAt: toIso(entry.order.paid_at),
+  items: entry.items.map((item) => ({
+    id: item.id,
+    eventTicketTypeId: item.event_ticket_type_id,
+    eventName: item.event_title,
+    ticketTypeName: item.ticket_type_name,
+    quantity: item.quantity,
+    unitPrice: item.unit_price,
+    subtotal: item.subtotal,
+  })),
+  payment: presentPayment(entry.payment),
 });

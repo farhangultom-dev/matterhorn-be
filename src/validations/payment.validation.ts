@@ -5,6 +5,11 @@ const httpsUrl = z.string().url().refine((value) => {
   return parsed.protocol === 'https:' && !parsed.username && !parsed.password;
 }, 'URL must use HTTPS and must not contain credentials');
 
+const positiveQueryInteger = z.preprocess(
+  (value) => typeof value === 'string' && /^\d+$/.test(value) ? Number(value) : value,
+  z.number().int().positive(),
+);
+
 export const createPaymentSchema = z.object({
   items: z.array(z.object({
     eventTicketTypeId: z.string().uuid(),
@@ -27,6 +32,12 @@ export const paymentOrderParamsSchema = z.object({
   orderId: z.string().uuid(),
 }).strict();
 
+export const paymentOrderHistoryQuerySchema = z.object({
+  page: positiveQueryInteger.default(1),
+  limit: positiveQueryInteger.pipe(z.number().max(100)).default(20),
+  search: z.string().trim().min(1).max(100).optional(),
+}).strict();
+
 export const sumopodPaymentResponseSchema = z.object({
   payment_id: z.string().trim().min(1).max(150),
   order_id: z.string().trim().min(1).max(150),
@@ -45,4 +56,5 @@ export const sumopodPaymentResponseSchema = z.object({
 export type CreatePaymentInput = z.infer<typeof createPaymentSchema>;
 export type CreatePaymentHeaders = z.infer<typeof createPaymentHeadersSchema>;
 export type PaymentOrderParams = z.infer<typeof paymentOrderParamsSchema>;
+export type PaymentOrderHistoryQuery = z.infer<typeof paymentOrderHistoryQuerySchema>;
 export type SumopodPaymentResponse = z.infer<typeof sumopodPaymentResponseSchema>;

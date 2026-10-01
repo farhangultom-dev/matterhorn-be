@@ -70,6 +70,11 @@ export interface PaymentTransactionRecord {
   readonly last_webhook_received_at: Date | null;
 }
 
+export interface PaymentHistoryItemRecord extends PaymentOrderItemRecord {
+  readonly event_title: string;
+  readonly ticket_type_name: string;
+}
+
 export interface WebhookOrderRecord {
   readonly id: string;
   readonly subtotal_amount: number;
@@ -205,6 +210,69 @@ export const findLatestPaymentTransaction = async (executor: Executor, orderId: 
     .where({ order_id: orderId })
     .orderBy('id', 'desc')
     .first();
+
+export const findPaymentOrderHistoryPage = async (executor: Executor, userId: string, search: string | undefined, limit: number, offset: number): Promise<{ rows: PaymentOrderRecord[]; total: number }> => {
+  const applyFilters = (query: Knex.QueryBuilder): Knex.QueryBuilder => {
+    query.where('o.user_id', userId);
+    if (search) {
+      query.whereExists(function () {
+        this.select(executor.raw('1'))
+          .from('order_items as oi')
+          .join('event_ticket_types as ett', 'ett.id', 'oi.event_ticket_type_id')
+          .join('events as e', 'e.id', 'ett.event_id')
+          .whereRaw('oi.order_id = o.id')
+          .whereILike('e.title', `%${search}%`);
+      });
+    }
+    return query;
+  };
+
+  const countResult = await applyFilters(executor('orders as o'))
+    .countDistinct<{ total: string | number }>({ total: 'o.id' })
+    .first();
+  const rows = await applyFilters(executor<PaymentOrderRecord>('orders as o')
+    .select(
+      'o.id', 'o.user_id', 'o.checkout_key', 'o.request_fingerprint', 'o.subtotal_amount', 'o.fee_amount',
+      'o.total_amount', 'o.status', 'o.created_at', 'o.paid_at', 'o.updated_at',
+    ))
+    .orderBy('o.created_at', 'desc')
+    .orderBy('o.id', 'desc')
+    .limit(limit)
+    .offset(offset);
+
+  return { rows, total: Number(countResult?.total ?? 0) };
+};
+
+export const findPaymentOrderHistoryItems = async (executor: Executor, orderIds: readonly string[]): Promise<PaymentHistoryItemRecord[]> => {
+  if (orderIds.length === 0) return [];
+  return executor<PaymentHistoryItemRecord>('order_items as oi')
+    .join('event_ticket_types as ett', 'ett.id', 'oi.event_ticket_type_id')
+    .join('events as e', 'e.id', 'ett.event_id')
+    .select(
+      'oi.id', 'oi.order_id', 'oi.event_ticket_type_id', 'oi.quantity', 'oi.unit_price', 'oi.subtotal', 'oi.created_at',
+      'e.title as event_title', 'ett.name as ticket_type_name',
+    )
+    .whereIn('oi.order_id', orderIds)
+    .orderBy('oi.created_at', 'asc')
+    .orderBy('oi.id', 'asc');
+};
+
+export const findLatestPaymentTransactionsForOrders = async (executor: Executor, orderIds: readonly string[]): Promise<PaymentTransactionRecord[]> => {
+  if (orderIds.length === 0) return [];
+  return executor<PaymentTransactionRecord>('payment_transactions as pt')
+    .select(
+      'pt.id', 'pt.order_id', 'pt.provider', 'pt.provider_reference', 'pt.merchant_reference', 'pt.amount', 'pt.status', 'pt.expires_at', 'pt.paid_at', 'pt.cancelled_at',
+      'pt.payment_link_url', 'pt.provider_fee_amount', 'pt.provider_net_amount', 'pt.initiation_state', 'pt.initiation_started_at',
+      'pt.payment_method', 'pt.settled_at', 'pt.completed_at', 'pt.last_webhook_event_type', 'pt.last_webhook_received_at',
+    )
+    .whereIn('pt.order_id', orderIds)
+    .whereNotExists(function () {
+      this.select(executor.raw('1'))
+        .from('payment_transactions as newer')
+        .whereRaw('newer.order_id = pt.order_id')
+        .whereRaw('newer.id > pt.id');
+    });
+};
 
 export const findPaymentTransactionForUpdate = async (transaction: Knex.Transaction, paymentId: number): Promise<PaymentTransactionRecord | undefined> =>
   transaction<PaymentTransactionRecord>('payment_transactions')

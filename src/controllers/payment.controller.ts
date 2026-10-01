@@ -1,8 +1,22 @@
 import type { RequestHandler } from 'express';
-import { getOwnedPaymentCheckout, createPaymentCheckout } from '../services/payment.service';
-import type { CreatePaymentInput, PaymentOrderParams } from '../validations/payment.validation';
+import { getOwnedPaymentCheckout, getPaymentOrderHistory, createPaymentCheckout } from '../services/payment.service';
+import type { CreatePaymentInput, PaymentOrderHistoryQuery, PaymentOrderParams } from '../validations/payment.validation';
 import { successResponse } from '../views/response.view';
-import { presentPaymentCheckout } from '../views/payment.view';
+import { presentPaymentCheckout, presentPaymentOrderHistoryEntry } from '../views/payment.view';
+
+export const getPaymentOrderHistoryController: RequestHandler = async (request, response) => {
+  const filters = response.locals.validatedQuery as PaymentOrderHistoryQuery;
+  const result = await getPaymentOrderHistory({ ...filters, userId: request.auth!.userId });
+  response.json(successResponse('Payment order history retrieved', {
+    orders: result.rows.map(presentPaymentOrderHistoryEntry),
+    pagination: {
+      page: filters.page,
+      limit: filters.limit,
+      total: result.total,
+      totalPages: result.total === 0 ? 0 : Math.ceil(result.total / filters.limit),
+    },
+  }));
+};
 
 export const createPaymentController: RequestHandler = async (request, response) => {
   const result = await createPaymentCheckout({
