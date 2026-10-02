@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { createPaymentController, getPaymentOrderController, getPaymentOrderHistoryController } from '../controllers/payment.controller';
 import { processSumopodWebhookController } from '../controllers/payment-webhook.controller';
+import { getOrderTicketsController } from '../controllers/ticket.controller';
 import { authenticate } from '../middlewares/authenticate.middleware';
 import { validatePaymentIdempotencyKey } from '../middlewares/payment-idempotency.middleware';
 import { verifySumopodWebhookToken } from '../middlewares/sumopod-webhook-token.middleware';
@@ -12,6 +13,10 @@ const router = Router();
 
 router.post('/webhooks/sumopod', verifySumopodWebhookToken, validateBody(sumopodWebhookSchema), processSumopodWebhookController);
 router.get('/orders', authenticate, validateQuery(paymentOrderHistoryQuerySchema), getPaymentOrderHistoryController);
+router.get('/orders/:orderId/tickets', (_request, response, next) => {
+  response.setHeader('Cache-Control', 'private, no-store');
+  next();
+}, authenticate, validateParams(paymentOrderParamsSchema), getOrderTicketsController);
 router.get('/orders/:orderId', authenticate, validateParams(paymentOrderParamsSchema), getPaymentOrderController);
 router.post('/', authenticate, validatePaymentIdempotencyKey, validateBody(createPaymentSchema), createPaymentController);
 

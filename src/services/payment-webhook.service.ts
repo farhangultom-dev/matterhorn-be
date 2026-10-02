@@ -11,6 +11,7 @@ import {
 } from '../models/payment.model';
 import type { SumopodPaymentMutationEvent, SumopodWebhookEvent } from '../validations/payment-webhook.validation';
 import { AppError } from '../utils/app-error';
+import { ensureOrderTickets } from './ticket-issuance.service';
 
 export type WebhookProcessingResult = 'processed' | 'duplicate' | 'ignored';
 
@@ -136,10 +137,14 @@ export const processSumopodWebhook = async ({ event, receivedAt }: {
       await validateWebhookReferences(transaction, event, values.payment);
       const reconcileAmounts = validateWebhookAmounts(event, values);
 
-      if (isDuplicateEvent(event, values)) return 'duplicate';
+      if (isDuplicateEvent(event, values)) {
+        if (event.event_type === 'payment.completed') await ensureOrderTickets(transaction, values.order.id);
+        return 'duplicate';
+      }
       if (shouldIgnoreEvent(event, values)) return 'ignored';
 
       await bindWebhookPayment(transaction, event, values, receivedAt, reconcileAmounts);
+      if (event.event_type === 'payment.completed') await ensureOrderTickets(transaction, values.order.id);
       return 'processed';
     });
     return { eventType: event.event_type, result };

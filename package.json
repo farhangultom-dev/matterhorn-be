@@ -20,6 +20,7 @@
     "db:status": "npm run build && knex --knexfile dist/database/knexfile.js migrate:list",
     "db:seed:reference": "npm run build && knex --knexfile dist/database/knexfile.js seed:run --specific=001_reference.js",
     "db:seed:development": "npm run build && knex --knexfile dist/database/knexfile.js seed:run --specific=100_development.js",
+    "tickets:backfill": "npm run build && node dist/scripts/backfill-order-tickets.js",
     "smtp:check": "npm run build && node dist/scripts/check-smtp.js"
   },
   "dependencies": {

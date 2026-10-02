@@ -4,6 +4,7 @@ type Executor = Knex | Knex.Transaction;
 
 export interface CheckoutEventRecord {
   readonly id: string;
+  readonly title: string;
   readonly visibility: 'public' | 'private';
   readonly deleted_at: Date | null;
   readonly starts_at: Date;
@@ -44,6 +45,8 @@ export interface PaymentOrderItemRecord {
   readonly quantity: number;
   readonly unit_price: number;
   readonly subtotal: number;
+  readonly event_title_snapshot?: string | null;
+  readonly ticket_type_name_snapshot?: string | null;
   readonly created_at: Date;
 }
 
@@ -104,7 +107,7 @@ export const findTicketEventIds = async (transaction: Knex.Transaction, ticketTy
 
 export const lockCheckoutEvent = async (transaction: Knex.Transaction, eventId: string): Promise<CheckoutEventRecord | undefined> =>
   transaction<CheckoutEventRecord>('events')
-    .select('id', 'visibility', 'deleted_at', 'starts_at', 'ends_at', 'registration_open_at', 'registration_close_at', 'capacity')
+    .select('id', 'title', 'visibility', 'deleted_at', 'starts_at', 'ends_at', 'registration_open_at', 'registration_close_at', 'capacity')
     .where({ id: eventId })
     .forUpdate()
     .first();
@@ -168,6 +171,8 @@ export const insertPaymentOrderItems = async (transaction: Knex.Transaction, val
   readonly quantity: number;
   readonly unit_price: number;
   readonly subtotal: number;
+  readonly event_title_snapshot: string;
+  readonly ticket_type_name_snapshot: string;
 }[]): Promise<void> => {
   await transaction('order_items').insert(values);
 };

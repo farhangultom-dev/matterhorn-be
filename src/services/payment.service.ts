@@ -174,6 +174,8 @@ export const createPaymentCheckout = async ({ userId, checkoutKey, input }: { us
           quantity: item.quantity,
           unit_price: ticket.price,
           subtotal,
+          event_title_snapshot: event.title,
+          ticket_type_name_snapshot: ticket.name,
         };
       });
       if (!Number.isSafeInteger(subtotalAmount) || subtotalAmount > MAX_POSTGRES_INTEGER) throw new AppError(400, 'VALIDATION_ERROR', 'Checkout amount is too large');

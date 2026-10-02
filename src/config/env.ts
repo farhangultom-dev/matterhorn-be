@@ -154,6 +154,15 @@ const sumopodSchema = z.object({
   }
 });
 
+const ticketQrSchema = z.object({
+  TICKET_QR_SECRET_V1: optionalText,
+}).superRefine((value, context) => {
+  if (!value.TICKET_QR_SECRET_V1) return;
+  if (!/^[0-9a-fA-F]{64}$/.test(value.TICKET_QR_SECRET_V1)) {
+    context.addIssue({ code: 'custom', path: ['TICKET_QR_SECRET_V1'], message: 'Must be exactly 64 hexadecimal characters' });
+  }
+});
+
 const parse = <T>(schema: z.ZodType<T>): T => {
   loadEnvironmentFile();
   const result = schema.safeParse(process.env);
@@ -224,6 +233,11 @@ export interface SumopodWebhookEnv {
   readonly token: string;
 }
 
+export interface TicketQrEnv {
+  readonly configured: boolean;
+  readonly secretKey: Buffer;
+}
+
 export const getAppEnv = (): AppEnv => {
   const value = parse(appSchema);
   return { nodeEnv: value.NODE_ENV, port: value.PORT };
@@ -280,4 +294,13 @@ export const getSumopodWebhookEnv = (): SumopodWebhookEnv => {
   const value = parse(sumopodSchema);
   const token = value.SUMOPOD_WEBHOOK_TOKEN.trim();
   return { configured: token.length > 0, token };
+};
+
+export const getTicketQrEnv = (): TicketQrEnv => {
+  const value = parse(ticketQrSchema);
+  const secretHex = value.TICKET_QR_SECRET_V1.trim();
+  return {
+    configured: secretHex.length > 0,
+    secretKey: secretHex ? Buffer.from(secretHex, 'hex') : Buffer.alloc(0),
+  };
 };
