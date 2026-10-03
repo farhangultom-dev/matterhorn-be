@@ -8,6 +8,10 @@ export interface UserRoleRecord {
   readonly created_at: Date;
 }
 
+export interface UserRoleWithNameRecord extends UserRoleRecord {
+  readonly role_name: string;
+}
+
 export class UserRoleUserNotFoundError extends Error {
   public constructor() {
     super('User is not active');
@@ -65,6 +69,15 @@ export const hasAnyActiveRoleId = async (userId: string, roleIds: readonly numbe
     .first();
   return row !== undefined;
 };
+
+export const findActiveUserRolesByUserId = async (userId: string): Promise<UserRoleWithNameRecord[]> =>
+  getDatabase()<UserRoleWithNameRecord>('user_roles as ur')
+    .join('roles as r', 'r.id', 'ur.role_id')
+    .select('ur.id', 'ur.user_id', 'ur.role_id', 'ur.created_at', 'r.name as role_name')
+    .where('ur.user_id', userId)
+    .whereNull('ur.deleted_at')
+    .whereNull('r.deleted_at')
+    .orderBy([{ column: 'ur.role_id', order: 'asc' }, { column: 'ur.id', order: 'asc' }]);
 
 export const insertUserRole = async ({ userId, roleId }: { userId: string; roleId: number }): Promise<UserRoleRecord> =>
   getDatabase().transaction(async (transaction: Knex.Transaction) => {

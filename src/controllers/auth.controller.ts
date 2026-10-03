@@ -4,6 +4,7 @@ import type { LoginInput, RegisterInput, ResendVerificationOtpInput, VerifyEmail
 import { presentUser } from '../views/user.view';
 import { presentUserDetails } from '../views/user-details.view';
 import { successResponse } from '../views/response.view';
+import { presentUserRoleWithName } from '../views/user-role.view';
 
 export const registerController: RequestHandler = async (_request, response) => {
   const user = await register(response.locals.validatedBody as RegisterInput);
@@ -12,7 +13,13 @@ export const registerController: RequestHandler = async (_request, response) => 
 
 export const loginController: RequestHandler = async (_request, response) => {
   const result = await login(response.locals.validatedBody as LoginInput);
-  response.json(successResponse('Login successful', { user: presentUser(result.user), accessToken: result.accessToken, tokenType: 'Bearer', expiresIn: result.expiresIn }));
+  response.json(successResponse('Login successful', {
+    user: presentUser(result.user),
+    userRoles: result.userRoles.map(presentUserRoleWithName),
+    accessToken: result.accessToken,
+    tokenType: 'Bearer',
+    expiresIn: result.expiresIn,
+  }));
 };
 
 export const meController: RequestHandler = async (request, response) => {
