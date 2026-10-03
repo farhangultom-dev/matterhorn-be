@@ -33,6 +33,8 @@ export const listEventsQuerySchema = z.object({
   startsFrom: timestamp.optional(),
 }).strict();
 
+export const listOrganizerEventsQuerySchema = listEventsQuerySchema.omit({ organizerId: true });
+
 const eventCreateFields = {
   organizerId: z.string().uuid(),
   title: z.string().trim().min(1).max(200),
@@ -111,5 +113,6 @@ export const updateEventSchema = z.object({
 
 export type EventIdParams = z.infer<typeof eventIdParamsSchema>;
 export type ListEventsQuery = z.infer<typeof listEventsQuerySchema>;
+export type ListOrganizerEventsQuery = z.infer<typeof listOrganizerEventsQuerySchema>;
 export type CreateEventInput = z.infer<typeof createEventSchema>;
 export type UpdateEventInput = z.infer<typeof updateEventSchema>;
