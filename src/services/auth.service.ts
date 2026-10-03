@@ -12,6 +12,7 @@ import { findActiveUserDisciplineSportsByUserId, type UserDisciplineSportRecord 
 import { generateEmailOtp, EMAIL_OTP_MAX_FAILED_ATTEMPTS, EMAIL_OTP_MAX_RESENDS, EMAIL_OTP_RESEND_DELAY_MS, EMAIL_OTP_WINDOW_MS, matchesEmailOtp } from '../utils/email-otp';
 import { sendVerificationEmail } from './mail.service';
 import { findActiveUserRolesByUserId, type UserRoleWithNameRecord } from '../models/user-role.model';
+import { findActiveOrganizersByUserId, type OrganizerRecord } from '../models/organizer.model';
 
 const emailDeliveryUnavailable = (): AppError => new AppError(503, 'EMAIL_DELIVERY_UNAVAILABLE', 'Email delivery is unavailable');
 const REGISTER_DEFAULT_ROLE_ID = 5;
@@ -64,6 +65,7 @@ export const register = async (input: RegisterInput): Promise<UserRecord> => {
 export interface LoginResult {
   readonly user: UserRecord;
   readonly userRoles: readonly UserRoleWithNameRecord[];
+  readonly organizers: readonly OrganizerRecord[];
   readonly accessToken: string;
   readonly expiresIn: number;
 }
@@ -74,8 +76,11 @@ export const login = async (input: LoginInput): Promise<LoginResult> => {
   const passwordMatches = await comparePassword(input.password, user?.password_hash ?? dummyPasswordHash);
   if (!user || !passwordMatches) throw new AppError(401, 'INVALID_CREDENTIALS', 'Email or password is incorrect');
   if (!user.is_email_verified) throw new AppError(403, 'EMAIL_NOT_VERIFIED', 'Email address must be verified');
-  const userRoles = await findActiveUserRolesByUserId(user.id);
-  return { user, userRoles, accessToken: createAccessToken(user.id, env.jwtSecret, env.jwtExpiresInSeconds), expiresIn: env.jwtExpiresInSeconds };
+  const [userRoles, organizers] = await Promise.all([
+    findActiveUserRolesByUserId(user.id),
+    findActiveOrganizersByUserId(user.id),
+  ]);
+  return { user, userRoles, organizers, accessToken: createAccessToken(user.id, env.jwtSecret, env.jwtExpiresInSeconds), expiresIn: env.jwtExpiresInSeconds };
 };
 
 export interface CurrentUserResult {

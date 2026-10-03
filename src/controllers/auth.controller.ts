@@ -5,6 +5,7 @@ import { presentUser } from '../views/user.view';
 import { presentUserDetails } from '../views/user-details.view';
 import { successResponse } from '../views/response.view';
 import { presentUserRoleWithName } from '../views/user-role.view';
+import { presentOrganizer } from '../views/organizer.view';
 
 export const registerController: RequestHandler = async (_request, response) => {
   const user = await register(response.locals.validatedBody as RegisterInput);
@@ -16,6 +17,7 @@ export const loginController: RequestHandler = async (_request, response) => {
   response.json(successResponse('Login successful', {
     user: presentUser(result.user),
     userRoles: result.userRoles.map(presentUserRoleWithName),
+    organizers: result.organizers.map(presentOrganizer),
     accessToken: result.accessToken,
     tokenType: 'Bearer',
     expiresIn: result.expiresIn,

@@ -69,6 +69,12 @@ const organizerColumns = [
 
 const selectOrganizerColumns = (query: Knex.QueryBuilder): Knex.QueryBuilder => query.select(...organizerColumns);
 
+export const findActiveOrganizersByUserId = async (userId: string): Promise<OrganizerRecord[]> =>
+  selectOrganizerColumns(getDatabase()<OrganizerRecord>('organizers'))
+    .where({ user_id: userId })
+    .whereNull('deleted_at')
+    .orderBy([{ column: 'created_at', order: 'asc' }, { column: 'id', order: 'asc' }]) as Promise<OrganizerRecord[]>;
+
 export const validateOrganizerReferences = async (
   transaction: Knex.Transaction,
   references: { readonly user_id: string | null; readonly community_id: string | null },
