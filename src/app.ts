@@ -6,6 +6,7 @@ import { notFound } from './middlewares/not-found.middleware';
 export const createApp = (): Express => {
   const app = express();
   app.disable('x-powered-by');
+  app.use('/api/v1/blogs', express.json({ limit: '256kb' }));
   app.use(express.json({ limit: '16kb' }));
   app.use(routes);
   app.use(notFound);

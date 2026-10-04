@@ -10,6 +10,7 @@ import communityRoutes from './community.routes';
 import organizerRoutes from './organizer.routes';
 import eventRoutes from './event.routes';
 import paymentRoutes from './payment.routes';
+import blogRoutes from './blog.routes';
 
 const router = Router();
 router.use('/health', healthRoutes);
@@ -23,5 +24,6 @@ router.use('/api/v1/communities', communityRoutes);
 router.use('/api/v1/organizers', organizerRoutes);
 router.use('/api/v1/events', eventRoutes);
 router.use('/api/v1/payments', paymentRoutes);
+router.use('/api/v1/blogs', blogRoutes);
 
 export default router;
