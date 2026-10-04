@@ -12,7 +12,7 @@ import { authenticate } from '../middlewares/authenticate.middleware';
 import { parseBlogCreateRequest } from '../middlewares/blog-cover-upload.middleware';
 import { requireBlogAdmin } from '../middlewares/require-blog-admin.middleware';
 import { validateBody, validateParams, validateQuery } from '../middlewares/validate.middleware';
-import { blogIdParamsSchema, listAdminBlogsQuerySchema, listBlogsQuerySchema, updateBlogSchema } from '../validations/blog.validation';
+import { blogIdParamsSchema, blogSlugParamsSchema, listAdminBlogsQuerySchema, listBlogsQuerySchema, updateBlogSchema } from '../validations/blog.validation';
 
 const router = Router();
 const preventPrivateBlogCaching: import('express').RequestHandler = (_request, response, next) => {
@@ -21,11 +21,11 @@ const preventPrivateBlogCaching: import('express').RequestHandler = (_request, r
 };
 
 router.get('/manage', preventPrivateBlogCaching, authenticate, validateQuery(listAdminBlogsQuerySchema), listAdminBlogsController);
-router.get('/manage/:blogId', preventPrivateBlogCaching, authenticate, validateParams(blogIdParamsSchema), getAdminBlogController);
+router.get('/manage/:slug', preventPrivateBlogCaching, authenticate, validateParams(blogSlugParamsSchema), getAdminBlogController);
 router.get('/', validateQuery(listBlogsQuerySchema), listPublicBlogsController);
 router.post('/', authenticate, requireBlogAdmin, parseBlogCreateRequest, createBlogController);
 router.patch('/:blogId', authenticate, validateParams(blogIdParamsSchema), validateBody(updateBlogSchema), updateBlogController);
 router.delete('/:blogId', authenticate, validateParams(blogIdParamsSchema), deleteBlogController);
-router.get('/:blogId', validateParams(blogIdParamsSchema), getPublicBlogController);
+router.get('/:slug', validateParams(blogSlugParamsSchema), getPublicBlogController);
 
 export default router;

@@ -22,6 +22,11 @@ export const blogIdParamsSchema = z.object({
   blogId: z.string().uuid(),
 }).strict();
 
+export const blogSlugParamsSchema = z.object({
+  slug: z.string().trim().toLowerCase().min(3).max(220)
+    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Slug must use lowercase letters, numbers, and single hyphens'),
+}).strict();
+
 export const listBlogsQuerySchema = z.object({
   page: positiveQueryInteger.default(1),
   limit: positiveQueryInteger.pipe(z.number().max(100)).default(20),
@@ -52,6 +57,7 @@ export const updateBlogSchema = z.object({
 });
 
 export type BlogIdParams = z.infer<typeof blogIdParamsSchema>;
+export type BlogSlugParams = z.infer<typeof blogSlugParamsSchema>;
 export type ListBlogsQuery = z.infer<typeof listBlogsQuerySchema>;
 export type ListAdminBlogsQuery = z.infer<typeof listAdminBlogsQuerySchema>;
 export type CreateBlogInput = z.infer<typeof createBlogSchema>;

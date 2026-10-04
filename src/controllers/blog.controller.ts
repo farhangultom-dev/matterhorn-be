@@ -1,6 +1,6 @@
 import type { RequestHandler } from 'express';
 import { createBlog, deleteBlog, getAdminBlog, getAdminBlogs, getPublicBlog, getPublicBlogs, updateBlogById } from '../services/blog.service';
-import type { BlogIdParams, CreateBlogInput, ListAdminBlogsQuery, ListBlogsQuery, UpdateBlogInput } from '../validations/blog.validation';
+import type { BlogIdParams, BlogSlugParams, CreateBlogInput, ListAdminBlogsQuery, ListBlogsQuery, UpdateBlogInput } from '../validations/blog.validation';
 import { presentBlog, presentBlogSummary } from '../views/blog.view';
 import type { BlogCoverFile } from '../services/blog-cover-storage.service';
 import { successResponse } from '../views/response.view';
@@ -31,14 +31,14 @@ export const listAdminBlogsController: RequestHandler = async (request, response
 };
 
 export const getPublicBlogController: RequestHandler = async (_request, response) => {
-  const { blogId } = response.locals.validatedParams as BlogIdParams;
-  const blog = await getPublicBlog(blogId);
+  const { slug } = response.locals.validatedParams as BlogSlugParams;
+  const blog = await getPublicBlog(slug);
   response.json(successResponse('Blog retrieved', { blog: presentBlog(blog) }));
 };
 
 export const getAdminBlogController: RequestHandler = async (request, response) => {
-  const { blogId } = response.locals.validatedParams as BlogIdParams;
-  const blog = await getAdminBlog(request.auth!.userId, blogId);
+  const { slug } = response.locals.validatedParams as BlogSlugParams;
+  const blog = await getAdminBlog(request.auth!.userId, slug);
   response.json(successResponse('Blog retrieved', { blog: presentBlog(blog) }));
 };
 

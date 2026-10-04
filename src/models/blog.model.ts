@@ -87,9 +87,9 @@ export const findPublicBlogs = async (filters: BlogListFilters): Promise<BlogLis
   return { rows, total: Number(countRow?.count ?? 0) };
 };
 
-export const findPublicBlogById = async (blogId: string): Promise<BlogRecord | undefined> =>
+export const findPublicBlogBySlug = async (slug: string): Promise<BlogRecord | undefined> =>
   selectDetailColumns(getDatabase()<BlogRecord>('blogs'))
-    .where({ id: blogId, status: 'published' })
+    .where({ slug, status: 'published' })
     .whereNull('deleted_at')
     .first();
 
@@ -110,9 +110,9 @@ export const findAdminBlogs = async (filters: BlogListFilters): Promise<BlogList
   return { rows, total: Number(countRow?.count ?? 0) };
 };
 
-export const findAdminBlogById = async (blogId: string): Promise<BlogRecord | undefined> =>
+export const findAdminBlogBySlug = async (slug: string): Promise<BlogRecord | undefined> =>
   selectDetailColumns(getDatabase()<BlogRecord>('blogs'))
-    .where({ id: blogId })
+    .where({ slug })
     .whereNull('deleted_at')
     .first();
 

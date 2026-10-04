@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { getDatabase } from '../config/database';
-import { findAdminBlogById, findAdminBlogs, findBlogForUpdate, findPublicBlogById, findPublicBlogs, insertBlog, isUniqueBlogSlugError, softDeleteBlog, updateBlog, type BlogCreateValues, type BlogRecord, type BlogUpdateValues } from '../models/blog.model';
+import { findAdminBlogBySlug, findAdminBlogs, findBlogForUpdate, findPublicBlogBySlug, findPublicBlogs, insertBlog, isUniqueBlogSlugError, softDeleteBlog, updateBlog, type BlogCreateValues, type BlogRecord, type BlogUpdateValues } from '../models/blog.model';
 import { hasAnyActiveRoleId } from '../models/user-role.model';
 import { getDatabaseNow } from '../models/email-verification-otp.model';
 import type { CreateBlogInput, ListAdminBlogsQuery, ListBlogsQuery, UpdateBlogInput } from '../validations/blog.validation';
@@ -47,8 +47,8 @@ const toUpdateValues = (input: UpdateBlogInput): BlogUpdateValues => ({
 
 export const getPublicBlogs = (filters: ListBlogsQuery) => findPublicBlogs(filters);
 
-export const getPublicBlog = async (blogId: string): Promise<BlogRecord> => {
-  const blog = await findPublicBlogById(blogId);
+export const getPublicBlog = async (slug: string): Promise<BlogRecord> => {
+  const blog = await findPublicBlogBySlug(slug);
   if (!blog) throw blogNotFound();
   return blog;
 };
@@ -58,9 +58,9 @@ export const getAdminBlogs = async (actorUserId: string, filters: ListAdminBlogs
   return findAdminBlogs(filters);
 };
 
-export const getAdminBlog = async (actorUserId: string, blogId: string): Promise<BlogRecord> => {
+export const getAdminBlog = async (actorUserId: string, slug: string): Promise<BlogRecord> => {
   await assertBlogAdminAccess(actorUserId);
-  const blog = await findAdminBlogById(blogId);
+  const blog = await findAdminBlogBySlug(slug);
   if (!blog) throw blogNotFound();
   return blog;
 };
